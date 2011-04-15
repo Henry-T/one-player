@@ -117,13 +117,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="WaveFile.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Common\dxstdafx.h" />
     <ClInclude Include="DirectSound.h" />
     <ClInclude Include="OnePlayer.h" />
     <ClInclude Include="OnePlayerDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="WaveFile.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Fast.bmp" />
