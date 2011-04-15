@@ -35,6 +35,7 @@ LPDIRECTSOUNDBUFFER  CDirectSound::m_pDsb;
 LPDIRECTSOUND3DBUFFER8  CDirectSound::m_pDs3db;
 DS3DBUFFER CDirectSound::m_Ds3dbParams;			// 3D缓冲区参数
 LPDIRECTSOUND3DLISTENER8 CDirectSound::m_pDs3dl;
+DS3DLISTENER CDirectSound::m_Ds3dblParams;
 LPDIRECTSOUNDNOTIFY8 CDirectSound::m_pDsNotify;
 DWORD CDirectSound::m_dwInstances;
 
@@ -50,7 +51,7 @@ CDirectSound::CDirectSound()
 	m_pTheSound = 0;
 	m_bEnabled = TRUE;
 
-	m_bPlay = 0;
+	m_bPlay = false;
 	++m_dwInstances;
 	m_hPlayThread = 0;
 	m_dwBufNum = 4;
@@ -223,6 +224,11 @@ BOOL CDirectSound::CreateSoundBuffer(WAVEFORMATEX * pcmwf)
 		m_pDsb = 0;
 		return FALSE;
 	}
+	// 设置主缓冲区格式
+	HRESULT hr;
+	hr = m_pDsb->SetFormat((LPCWAVEFORMATEX)pcmwf);
+	if(hr != S_OK)
+		return hr;
 
 	for (int i=0;i<m_dwBufNum;i++)
 	{
@@ -266,8 +272,11 @@ BOOL CDirectSound::CreateSoundBuffer(WAVEFORMATEX * pcmwf)
 	{
 		return FALSE;
 	}
-
 	// 设置多Doppler因子、Rolloff因子、最大距离和最小距离等参数
+	::ZeroMemory(&m_Ds3dblParams, sizeof(DS3DLISTENER));
+	m_Ds3dblParams.flDopplerFactor = 0;
+	m_Ds3dblParams.flRolloffFactor = 0;
+	m_pDs3dl->SetAllParameters(&m_Ds3dblParams, DS3D_IMMEDIATE);
 
 	return TRUE;
 }
@@ -388,7 +397,7 @@ void CDirectSound::Play(INT nTime, BOOL bLoop)
 		// Try playing again
 		m_pDsb->Play(0, 0, 1);
 	}
-
+	m_bPlay = true;
 }
 
 // 停止操作
@@ -523,7 +532,7 @@ BOOL CDirectSound::WriteToBuf()
 
 				SetSoundData( m_dwOffset,m_pTheSound, m_dwBufLen);
 				if(m_dwBufSize > m_dwBufLen)
-					memcpy(m_pTheSound,m_pTheSound+m_dwBufLen,m_dwBufSize - m_dwBufLen);
+					memcpy(m_pTheSound,m_pTheSound+m_dwBufLen,m_dwBufSize - m_dwBufLen); 
 
 				m_dwBufSize -= m_dwBufLen;
 				ReleaseMutex(m_sysncObj);

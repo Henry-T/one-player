@@ -47,7 +47,7 @@ public:
 	void Pause();
 	void Continue();
 
-protected:
+public:
 	BOOL IsValid() const;
 	// 获取声音数据
 	BOOL GetWaveData(void *pHeader, WAVEFORMATEX * & pWaveHeader, DWORD &dwHeadSize);
@@ -72,7 +72,7 @@ protected:
 	BOOL SetRooloffFactor(D3DVALUE flRooloffFactor);
 	BOOL GetRooloffFactor(D3DVALUE *flRooloffFactor);
 
-private:
+public:
 	DSBPOSITIONNOTIFY DSNotify[16];
 	AUDIO_CONFIG m_config;
 	float m_fRate;
@@ -114,6 +114,7 @@ public:		// TODO 临时公开
 	static LPDIRECTSOUND3DBUFFER8 m_pDs3db;
 	static DS3DBUFFER m_Ds3dbParams;			// 3D缓冲区参数
 	static LPDIRECTSOUND3DLISTENER8 m_pDs3dl;
+	static DS3DLISTENER m_Ds3dblParams;
 	static LPDIRECTSOUNDNOTIFY8 m_pDsNotify;
 	static DWORD m_dwInstances;
 };

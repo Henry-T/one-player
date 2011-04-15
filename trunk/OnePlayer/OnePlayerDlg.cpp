@@ -576,10 +576,10 @@ void COnePlayerDlg::UpdateGrid(  FLOAT x, FLOAT y )
 	s_lY = (LONG)( (-y/ORBIT_MAX_RADIUS + 1 ) * ( rc.top + rc.bottom ) / 2 );
 
 	// Draw a crosshair object in red pixels
-	SetPixel( hDC, s_lX-1, s_lY+0, 0x000000ff );
-	SetPixel( hDC, s_lX+0, s_lY-1, 0x000000ff );
+	//SetPixel( hDC, s_lX-1, s_lY+0, 0x000000ff );
+	//SetPixel( hDC, s_lX+0, s_lY-1, 0x000000ff );
 	SetPixel( hDC, s_lX+0, s_lY+0, 0x000000ff );
-	SetPixel( hDC, s_lX+0, s_lY+1, 0x000000ff );
+	//SetPixel( hDC, s_lX+0, s_lY+1, 0x000000ff );
 	SetPixel( hDC, s_lX+1, s_lY+0, 0x000000ff );
 
 	::ReleaseDC( hWndGrid, hDC );
@@ -588,6 +588,9 @@ void COnePlayerDlg::UpdateGrid(  FLOAT x, FLOAT y )
 
 void COnePlayerDlg::OnTimer(UINT_PTR nIDEvent)
 {
+	if(!m_sndSound1->m_bPlay)
+		return;
+
 	FLOAT fXScale;
 	FLOAT fYScale;
 
@@ -614,6 +617,8 @@ void COnePlayerDlg::OnTimer(UINT_PTR nIDEvent)
 
 	if( m_sndSound1->m_pDs3db)
 		m_sndSound1->m_pDs3db->SetAllParameters( (LPCDS3DBUFFER)&m_sndSound1->m_Ds3dbParams, DS3D_IMMEDIATE );
+	//m_sndSound1->SetListenerPosition(vPosition.x, vPosition.y, vPosition.z);
+	//m_sndSound1->SetListenerVelocity(vVelocity.x, vVelocity.y, vVelocity.z);
 
 	CDialog::OnTimer(nIDEvent);
 }
