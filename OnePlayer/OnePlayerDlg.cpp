@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "OnePlayer.h"
 #include "OnePlayerDlg.h"
+#include "mmsystem.h"		// WaveFile类写好后去掉这一项
 
 #include <WindowsX.h>
 // 包含这个头文件以支持:
@@ -13,7 +14,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-          
+
 // 为什么放在这里？？
 #define  IDT_MOTION_TIMER 1
 
@@ -306,25 +307,15 @@ void COnePlayerDlg::ReadFileProc()
 
 }
 
-typedef struct _WAVE_FORMAT
-{
-	WORD AudioFormat;
-	WORD NumChannels;
-	DWORD SampleRate;
-	DWORD ByteRate;
-	WORD BlockAlign;
-	WORD BitsPerSample;
-}WAVE_FORMAT,*PWAVE_FORMAT;
-
 void COnePlayerDlg::OnBnClickedPlay()
 {
-	AUDIO_CONFIG WaveHead;	// 调用声音头文件
-	WaveHead.wFormatTag = 1;
-	WaveHead.nChannels = 2;
-	WaveHead.nSamplesPerSec = 44100;
-	WaveHead.nAvgBytesPerSec = 176400;
-	WaveHead.nBlockAlign = 4;
-	WaveHead.wBitsPerSample = 16;
+	WAVEFORMATEX WaveHead;	// 调用声音头文件
+	WaveHead.wFormatTag = 0;			// 1
+	WaveHead.nChannels = 0;				// 2 
+	WaveHead.nSamplesPerSec = 0;	// 44100
+	WaveHead.nAvgBytesPerSec = 0;	// 176400
+	WaveHead.nBlockAlign = 0;			// 4
+	WaveHead.wBitsPerSample = 0;		// 16
 
 	// 设置播放器状态
 	m_bContinue = 1;
@@ -343,22 +334,16 @@ void COnePlayerDlg::OnBnClickedPlay()
 	fseek(fp, 20, 0);	// 跳过RIFF头部的20Byte
 
 	// 读取Wave格式信息
-	WAVE_FORMAT waveFormat;
 	int nLen = 0;
-	nLen = fread(&waveFormat, 1, sizeof(WAVE_FORMAT), fp);
-
-	WaveHead.nBlockAlign = waveFormat.BlockAlign;
-	WaveHead.nChannels = waveFormat.NumChannels;
-	WaveHead.nSamplesPerSec = waveFormat.SampleRate;
-	WaveHead.wBitsPerSample = waveFormat.BitsPerSample;
-	WaveHead.nAvgBytesPerSec = waveFormat.ByteRate;
+	nLen = fread(&WaveHead, 1, sizeof(WAVEFORMATEX), fp);
 
 	// 创建文件准备播放
-	m_sndSound1->CreateDSound(&WaveHead, 8000);
+	// TODO 这里不应该重建DirectSound，只需要修改其中的声音格式细节
+	m_sndSound1->CreateDirectSound(&WaveHead);//, 8000);
 
 
 	// 开始创建线程
-	fseek(fp, 20+sizeof(WAVE_FORMAT),0);
+	fseek(fp, 20+sizeof(WAVEFORMATEX),0);
 	unsigned int dwReadID;
 	m_hThread = (HANDLE)_beginthreadex(0,0,FileReadProc, this, 0, &dwReadID);
 
@@ -610,15 +595,10 @@ void COnePlayerDlg::OnTimer(UINT_PTR nIDEvent)
 	vVelocity.y = 0.0f;
 	vVelocity.z = ORBIT_MAX_RADIUS * fYScale * (FLOAT)cos(t+0.05f); 
 	
-	memcpy( &m_sndSound1->m_Ds3dbParams.vPosition, &vPosition, sizeof(D3DVECTOR) );
-	memcpy( &m_sndSound1->m_Ds3dbParams.vVelocity, &vVelocity, sizeof(D3DVECTOR) );
+	m_sndSound1->SetListenerPosition(vPosition.x, vPosition.y, vPosition.z);
+	m_sndSound1->SetListenerVelocity(vVelocity.x, vVelocity.y, vVelocity.z);
 
 	UpdateGrid(  vPosition.x, vPosition.z );
-
-	if( m_sndSound1->m_pDs3db)
-		m_sndSound1->m_pDs3db->SetAllParameters( (LPCDS3DBUFFER)&m_sndSound1->m_Ds3dbParams, DS3D_IMMEDIATE );
-	//m_sndSound1->SetListenerPosition(vPosition.x, vPosition.y, vPosition.z);
-	//m_sndSound1->SetListenerVelocity(vVelocity.x, vVelocity.y, vVelocity.z);
 
 	CDialog::OnTimer(nIDEvent);
 }
